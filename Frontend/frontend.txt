@@ -1,0 +1,15 @@
+#frontend copy from evangadi Tech
+
+Links : Home,parternship,scholarship,contact,signin/signup
+
+#Home
+hero-section
+about-section
+course-section
+description-course-section
+scholarship-section
+community-section
+free-coursesection
+testimonial-section
+contact-section
+
