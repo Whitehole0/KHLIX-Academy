@@ -1,0 +1,50 @@
+#frontend copy from evangadi Tech
+
+Links : Home,parternship,scholarship,contact,signin/signup
+
+#Home
+ hero-section
+ about-section
+ course-section
+ description-course-section
+ scholarship-section
+ community-section
+ free-coursesection
+ testimonial-section
+ contact-section
+
+#signup
+ header
+ input:{name,email,password}
+ navigate to /signin
+
+
+#login
+ header
+ input:{email,password}
+ navigate to /dashboard(/getme)
+
+
+#course
+
+ category:{
+    #frontend:{HTML an CSS biginner,intermidiate HTML and CSS , javascript foundation,advanced HTML and CSS, Advanced javascript, React,Git and Github},
+    #backend:{npm packege manager,Nodejs,express.js,Authnitication Basics, etc}, 
+    #datbase:{Mongodb and its ORM, mySQL and its ORM}}
+
+ Video,lesson notes,projects,and answer for the questions that students ask 
+
+
+#Q/A forum
+ for time idk
+
+
+#Teacher or instructor dashboard
+  attendance checker
+  questions answering from
+
+#admin dashboard
+
+
+ add,update,delete Video,coures and lesson notes and projects
+#payment page

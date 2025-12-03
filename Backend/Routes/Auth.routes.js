@@ -4,7 +4,7 @@ import {
   getMe,
   logout,
   login,
-  refreshToken,
+  refreshTokenController,
 } from "../controllers/Auth.controller.js";
 import { protect } from "../middleware/Auth.middleware.js";
 const router = express.Router();
@@ -13,7 +13,7 @@ router.post("/login", login);
 router.post("/logout", protect, logout);
 router.get("/me", protect, getMe);
 
-router.get("/refreshToken", refreshToken);
+router.get("/refreshToken", refreshTokenController);
 export default router;
 
 //passport.js

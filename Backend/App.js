@@ -5,7 +5,11 @@ import helmet from "helmet";
 import compression from "compression";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import connectDB from "./config/db.config";
+import connectDB from "./config/db.config.js";
+
+import authRoute from "./Routes/Auth.routes.js";
+
+dotenv.config();
 
 const app = express();
 app.use(express.json({ limit: "10mb" }));
@@ -25,6 +29,8 @@ app.get("/", (req, res) => {
   res.status(200).send("These is the Home page");
 });
 
-app.listen(dotenv.config.PORT, () => {
+app.use("/auth", authRoute);
+
+app.listen(process.env.PORT, () => {
   console.log("the server is listening");
 });

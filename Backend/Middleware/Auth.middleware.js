@@ -5,31 +5,35 @@ export const protect = async (req, res, next) => {
   const token = req.cookies.token;
 
   if (!token) {
-    res.status(401).send("UnAuthrized, there is no given token");
+    return res.status(401).json({ message: "Unauthorized: No token provided" });
   }
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    const user = User.findById(decoded.id).select("-password");
-    if (!user) {
-      res
-        .status(401)
-        .send("unAuthorized, there is no user found in our database");
-    }
-    req.user = user;
+    const user = await User.findById(decoded.id).select("-password");
 
+    if (!user) {
+      return res
+        .status(401)
+        .json({ message: "Unauthorized: User does not exist" });
+    }
+
+    req.user = user;
     next();
   } catch (error) {
-    res.send(error);
+    return res.status(401).json({ message: "Invalid or expired token", error });
   }
 };
-//
 
 export const adminOnly = (req, res, next) => {
-  if (req.user && req.user.role === "admin") return next();
-  return res.status(403).json({ message: "Access denied" });
+  if (req.user && req.user.role === "admin") {
+    return next();
+  }
+
+  return res.status(403).json({ message: "Access denied: Admins only" });
 };
+
 // try {
 // //     let token = null;
 // //     if (
