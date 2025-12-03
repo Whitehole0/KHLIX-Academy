@@ -25,6 +25,6 @@ app.get("/", (req, res) => {
   res.status(200).send("These is the Home page");
 });
 
-app.listen(dotenv.config.prototype, () => {
+app.listen(dotenv.config.PORT, () => {
   console.log("the server is listening");
 });
