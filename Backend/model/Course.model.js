@@ -1,19 +1,5 @@
 import mongoose from "mongoose";
 
-const lessonSchema = new mongoose.Schema(
-  {
-    title: { type: String, required: true },
-    type: {
-      type: String,
-      enum: ["video", "article", "quiz"],
-      default: "video",
-    },
-    contentURL: String,
-    duration: String,
-  },
-  { _id: false }
-);
-
 const courseSchema = new mongoose.Schema(
   {
     title: { type: String, required: true, index: true },
@@ -28,7 +14,6 @@ const courseSchema = new mongoose.Schema(
     },
     instructor: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
     thumbnail: String,
-    lessons: [lessonSchema],
     studentsCount: { type: Number, default: 0 },
     avgRating: { type: Number, default: 0 },
   },

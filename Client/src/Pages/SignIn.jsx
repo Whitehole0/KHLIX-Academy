@@ -4,7 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 const SignIn = () => {
-  const [login] = useAuth();
+  const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
@@ -33,14 +33,20 @@ const SignIn = () => {
     setError("");
 
     try {
-      const res = await login("/api/login", { email, password });
+      const res = await login(email, password);
 
       console.log("Login success:", res.data);
 
       // Redirect to dashboard
       navigate("/");
     } catch (err) {
-      setError(err.response?.data || "Login failed");
+      const msg =
+        err.response?.data?.message ||
+        err.response?.data ||
+        err.message ||
+        "Login failed";
+
+      setError(typeof msg === "string" ? msg : JSON.stringify(msg));
     } finally {
       setLoading(false);
     }
@@ -72,7 +78,7 @@ const SignIn = () => {
 
         {error && (
           <p className="text-red-600 font-semibold text-2xl font-mono ">
-            {error}
+            {String(error)}
           </p>
         )}
 

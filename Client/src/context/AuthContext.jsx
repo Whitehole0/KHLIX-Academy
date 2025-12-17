@@ -13,8 +13,8 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const checkUser = async () => {
       try {
-        const res = await api.get("/auth/me");
-        setUser(res.data); // backend returns user
+        const res = await api.get("/auth/me", { withCredentials: true });
+        setUser(res.data.user); // backend returns user
       } catch (err) {
         setUser(null);
         console.log(err);
@@ -27,21 +27,21 @@ export const AuthProvider = ({ children }) => {
 
   // Login function
   const login = async (email, password) => {
-    try {
-      const res = await api.post("/auth/login", { email, password });
-      setUser(res.data);
-      // redirect based on role
-      if (res.data.role === "admin") navigate("/admin/dashboard");
-      else navigate("/dashboard");
-    } catch (err) {
-      throw err; // handle in form
-    }
+    const res = await api.post(
+      "/auth/login",
+      { email, password },
+      { withCredentials: true }
+    );
+
+    setUser(res.data.user); // FIXED
+    if (res.data.user.role === "admin") navigate("/admin/dashboard");
+    else navigate("/");
   };
 
   // Logout function
   const logout = async () => {
     try {
-      await api.post("/auth/logout");
+      await api.post("/auth/logout", { withCredentaials: true });
       setUser(null);
       navigate("/sign-in");
     } catch (err) {

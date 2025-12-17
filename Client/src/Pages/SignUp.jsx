@@ -21,6 +21,7 @@ const SignUp = () => {
 
     if (!name) {
       setError("You dont enter you name");
+      return;
     }
 
     if (!validEmail(email)) {
@@ -37,7 +38,7 @@ const SignUp = () => {
     setError("");
 
     try {
-      const res = await api.post("/api/register", { name, email, password });
+      const res = await api.post("/auth/register", { name, email, password });
 
       console.log("Login success:", res.data);
 
