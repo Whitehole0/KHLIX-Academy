@@ -16,6 +16,7 @@ export const createCourse = asyncHandler(async (req, res) => {
 
   const course = Course.create({
     title,
+    slug,
     description,
     price,
     category,
@@ -27,36 +28,37 @@ export const createCourse = asyncHandler(async (req, res) => {
 });
 
 export const getCourses = asyncHandler(async (req, res) => {
-  const courses = await Course.find().sort({ createdAt: -1 });
+  const courses = await Course.find().sort({ createdAt: -1 }).lean();
 
   res.json(courses);
 });
 
 export const getCourse = asyncHandler(async (req, res) => {
-  const { slug } = req.params;
+  // const { slug } = req.params;
 
-  const course = await Course.findOne({ slug });
+  // const course = await Course.findOne({ slug });
 
-  if (!course) {
-    res.send("The course is no found");
-  }
+  // if (!course) {
+  //   res.send("The course is no found");
+  // }
 
-  res.json(course);
+  res.json(req.course);
 });
 
 export const updateCourse = asyncHandler(async (req, res) => {
-  const { slug } = req.params;
+  // const { slug } = req.params;
 
-  const course = await Course.findOne({ slug });
+  // const course = await Course.findOne({ slug });
 
+  const course = req.course;
   if (!course) {
     res.send("the course is not found");
   }
 
-  if (req.body.title) {
+  if (req.body.title && course.status !== "published") {
     req.body.slug = slugify(req.body.title, { lower: true });
   }
-  const updated = await Course.findOneAndUpdate({ slug }, req.body, {
+  const updated = await Course.findOneAndUpdate(course, req.body, {
     new: true,
   });
 
@@ -64,14 +66,16 @@ export const updateCourse = asyncHandler(async (req, res) => {
 });
 
 export const deleteCourse = asyncHandler(async (req, res) => {
-  const { slug } = req.params;
+  // const { slug } = req.params;
 
-  const course = await Course.findOne({ slug });
+  // const course = await Course.findOne({ slug });
+
+  const course = req.course;
 
   if (!course) {
     res.send("the course is not found");
   }
 
-  await Course.deleteOne();
+  await Course.deleteOne(course);
   res.json({ Message: "The course is deleted Sucessfully" });
 });

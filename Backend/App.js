@@ -8,6 +8,7 @@ import cookieParser from "cookie-parser";
 import connectDB from "./config/db.config.js";
 
 import authRoute from "./Routes/Auth.routes.js";
+import courseRoute from "./Routes/Course.routes.js";
 
 dotenv.config();
 
@@ -30,6 +31,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/auth", authRoute);
+app.use("/course", courseRoute);
 
 app.listen(process.env.PORT, () => {
   console.log("the server is listening");

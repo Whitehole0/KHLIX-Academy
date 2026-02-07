@@ -1,19 +1,25 @@
 import express from "express";
 import {
   register,
-  getMe,
-  logout,
   login,
-  refreshTokenController,
+  refresh,
+  logout,
+  logoutAll,
 } from "../controllers/Auth.controller.js";
-import { protect } from "../middleware/Auth.middleware.js";
+import { protect, role } from "../middleware/Auth.middleware.js";
+
 const router = express.Router();
+
 router.post("/register", register);
 router.post("/login", login);
+router.post("/refresh", refresh);
 router.post("/logout", protect, logout);
-router.get("/me", protect, getMe);
+router.post("/logoutAll", protect, logoutAll);
+router.get("/me", protect, role("student"), (req, res) =>
+  res.json({ success: true, user: req.user }),
+);
+router.get("/adminCheck", protect, role("admin"), (req, res) =>
+  res.json({ success: true }),
+);
 
-router.post("/refreshToken", refreshTokenController);
 export default router;
-
-//passport.js

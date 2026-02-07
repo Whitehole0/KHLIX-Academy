@@ -3,9 +3,17 @@ import mongoose from "mongoose";
 const courseSchema = new mongoose.Schema(
   {
     title: { type: String, required: true, index: true },
+
     slug: { type: String, unique: true },
     description: String,
     category: String,
+    status: {
+      type: String,
+      enum: ["draft", "published", "archived"],
+      default: "draft",
+      index: true,
+    },
+
     price: { type: Number, default: 0 },
     level: {
       type: String,

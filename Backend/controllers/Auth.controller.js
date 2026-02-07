@@ -1,147 +1,148 @@
-import User from "../model/User.model.js";
 import asyncHandler from "express-async-handler";
-import jwt from "jsonwebtoken";
-import generateToken from "../utils/generateToken.js";
+import Session from "../models/Session.model.js";
+import User from "../models/User.model.js";
+import {
+  generateAccessToken,
+  generateRefreshToken,
+} from "../utils/generateTokens.js";
+import { verifyRefreshToken } from "../utils/verifyTokens.js";
 
-// ---------------- REGISTER ----------------
+const cookieOptions = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production",
+  sameSite: "lax",
+};
 
 export const register = asyncHandler(async (req, res) => {
   const { name, email, password } = req.body;
 
-  if (!name || !email || !password) {
-    return res.status(400).json({ message: "Missing information" });
-  }
-
   const exists = await User.findOne({ email });
-  if (exists) {
-    return res.status(400).json({ message: "User already exists" });
-  }
+  if (exists) return res.status(400).json({ message: "User already exists" });
 
   const user = await User.create({ name, email, password });
 
-  const { accessToken, refreshToken } = generateToken(user._id);
-
-  // Save refresh token in DB
-  user.refreshToken = refreshToken;
-  await user.save();
-
-  // Cookies
-  res.cookie("accessToken", accessToken, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
-    maxAge: 15 * 60 * 1000,
+  // Create session
+  const session = await Session.create({
+    user: user._id,
+    refreshToken: "temp",
+    userAgent: req.headers["user-agent"],
+    ip: req.ip,
+    expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
   });
 
+  const refreshToken = generateRefreshToken(session._id);
+  session.refreshToken = refreshToken;
+  await session.save();
+
+  const accessToken = generateAccessToken(user);
+
+  res.cookie("accessToken", accessToken, {
+    ...cookieOptions,
+    maxAge: 15 * 60 * 1000,
+  });
   res.cookie("refreshToken", refreshToken, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
-    maxAge: 7 * 24 * 60 * 60 * 1000,
+    ...cookieOptions,
+    maxAge: 30 * 24 * 60 * 60 * 1000,
   });
 
   res.status(201).json({
     success: true,
-    message: "Account created successfully",
-    user: {
-      id: user._id,
-      name: user.name,
-      email: user.email,
-    },
+    message: "Account created",
+    user: { id: user._id, name: user.name, email: user.email, role: user.role },
   });
 });
-
-// ---------------- LOGIN ----------------       
 
 export const login = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
-  if (!email || !password)
-    return res.status(400).json({ message: "Missing credentials" });
-
   const user = await User.findOne({ email }).select("+password");
-  if (!user) return res.status(401).json({ message: "User not found" });
+  if (!user) return res.status(404).json({ message: "User not found" });
 
   const match = await user.matchPassword(password);
-  if (!match) return res.status(401).json({ message: "Invalid password" });
+  if (!match) return res.status(401).json({ message: "Invalid credentials" });
 
-  const { accessToken, refreshToken } = generateToken(user._id);
+  // Create session
+  const session = await Session.create({
+    user: user._id,
+    refreshToken: "temp",
+    userAgent: req.headers["user-agent"],
+    ip: req.ip,
+    expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+  });
 
-  // Save refresh token
-  user.refreshToken = refreshToken;
-  await user.save();
+  const refreshToken = generateRefreshToken(session._id);
+  session.refreshToken = refreshToken;
+  await session.save();
+
+  const accessToken = generateAccessToken(user);
 
   res.cookie("accessToken", accessToken, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
+    ...cookieOptions,
     maxAge: 15 * 60 * 1000,
   });
-
   res.cookie("refreshToken", refreshToken, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
-    maxAge: 7 * 24 * 60 * 60 * 1000,
+    ...cookieOptions,
+    maxAge: 30 * 24 * 60 * 60 * 1000,
   });
 
-  res.status(200).json({
+  res.json({
     success: true,
-    message: "Logged in successfully",
-    user: {
-      id: user._id,
-      email: user.email,
-    },
+    message: "Logged in",
+    user: { id: user._id, name: user.name, email: user.email, role: user.role },
   });
 });
 
-// ---------------- LOGOUT ----------------
+export const refresh = asyncHandler(async (req, res) => {
+  const oldRefresh = req.cookies.refreshToken;
+  if (!oldRefresh) return res.status(401).json({ message: "No refresh token" });
+
+  const decoded = verifyRefreshToken(oldRefresh);
+
+  const session = await Session.findById(decoded.sessionId);
+  if (!session) return res.status(401).json({ message: "Session not found" });
+
+  if (session.expiresAt < new Date()) {
+    await session.deleteOne();
+    return res.status(401).json({ message: "Session expired" });
+  }
+
+  // ROTATE REFRESH TOKEN
+  const newRefresh = generateRefreshToken(session._id);
+  session.refreshToken = newRefresh;
+  session.expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+  await session.save();
+
+  const user = await User.findById(session.user);
+  const accessToken = generateAccessToken(user);
+
+  res.cookie("accessToken", accessToken, {
+    ...cookieOptions,
+    maxAge: 15 * 60 * 1000,
+  });
+  res.cookie("refreshToken", newRefresh, {
+    ...cookieOptions,
+    maxAge: 30 * 24 * 60 * 60 * 1000,
+  });
+
+  res.json({ success: true });
+});
 
 export const logout = asyncHandler(async (req, res) => {
+  const refreshToken = req.cookies.refreshToken;
+  if (refreshToken) {
+    const decoded = verifyRefreshToken(refreshToken);
+    await Session.findByIdAndDelete(decoded.sessionId);
+  }
+
   res.clearCookie("accessToken");
   res.clearCookie("refreshToken");
 
-  res.json({
-    success: true,
-    message: "Logged out successfully",
-  });
+  res.json({ success: true, message: "Logged out" });
 });
 
-// ---------------- GET ME ----------------
-
-export const getMe = asyncHandler(async (req, res) => {
-  res.json({
-    success: true,
-    user: req.user,
-  });
-});
-
-// ---------------- REFRESH TOKEN ----------------
-
-export const refreshTokenController = asyncHandler(async (req, res) => {
-  const refreshToken = req.cookies.refreshToken;
-
-  if (!refreshToken)
-    return res.status(401).json({ message: "No refresh token" });
-
-  // Find user with this refresh token
-  const user = await User.findOne({ refreshToken });
-
-  if (!user) return res.status(403).json({ message: "Invalid refresh token" });
-
-  // Verify token
-  const decoded = jwt.verify(refreshToken, process.env.JWT_SECRET);
-
-  const accessToken = jwt.sign({ id: decoded.id }, process.env.JWT_SECRET, {
-    expiresIn: "15m",
-  });
-
-  res.cookie("accessToken", accessToken, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
-    maxAge: 15 * 60 * 1000,
-  });
-
-  res.json({ success: true, message: "Access token refreshed" });
+export const logoutAll = asyncHandler(async (req, res) => {
+  await Session.deleteMany({ user: req.user._id });
+  res.clearCookie("accessToken");
+  res.clearCookie("refreshToken");
+  res.json({ success: true, message: "Logged out from all devices" });
 });

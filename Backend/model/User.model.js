@@ -6,7 +6,6 @@ const userSchema = new mongoose.Schema(
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true, index: true },
     password: { type: String },
-    refreshToken: { type: String },
     role: {
       type: String,
       enum: ["student", "instructor", "admin"],
@@ -15,7 +14,7 @@ const userSchema = new mongoose.Schema(
     profileImage: { type: String, default: "" },
     createdAt: { type: Date, default: Date.now },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 userSchema.methods.matchPassword = async function (password) {
