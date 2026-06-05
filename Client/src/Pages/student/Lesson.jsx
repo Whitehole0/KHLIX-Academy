@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 // import ReactPlayer from "react-player";
-import { lessonsAPI } from "../../utils/api";
+import { lessonsAPI } from "../../services/api";
 
 const StudentLesson = () => {
   const { lessonId } = useParams();

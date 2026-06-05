@@ -1,10 +1,9 @@
 import express from "express";
-import { upload } from "../config/cloudninary";
-import { uploadFile } from "../controllers/upload.controller";
-import { protect, role } from "../Middleware/Auth.middleware";
+import { generateUploadSignature } from "../controllers/upload.controller.js";
+import { protect, role } from "../middleware/auth.middleware.js";
 
 const router = express.Router();
 
-router.post("/", protect, role, upload.single("file"), uploadFile);
+router.post("/signature", protect, role("admin"), generateUploadSignature);
 
 export default router;

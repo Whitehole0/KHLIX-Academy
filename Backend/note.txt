@@ -1,0 +1,10 @@
+what i finished
+. authetication - jwt ,missing : oAuth
+
+.course crud-
+.lesson crud
+>enrollment 
+
+
+missing
+security,progress tracking, searching,assignment, quizes and others

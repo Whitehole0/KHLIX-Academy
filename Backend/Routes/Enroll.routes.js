@@ -6,21 +6,23 @@ import {
   unEnroll,
 } from "../controllers/Enroll.controller.js";
 
-// Middlewares (assume you have these)
-import { protect, role } from "../middleware/Auth.middleware.js";
+import { protect, role } from "../Middleware/Auth.middleware.js";
+import { isEnrolled } from "../Middleware/Role.middleware.js";
 
 const router = express.Router();
 
-// POST /api/enroll/:courseId -> enroll in a course
-// router.post("/:courseId", protect, role("student"), enrollStudent);
+router.post(
+  "/enroll/:courseId",
+  protect,
+  role("student"),
 
-// GET /api/enroll -> get all courses the student is enrolled in
-router.get("/", protect, getEnrolledCourses);
+  enrollStudent,
+);
 
-// GET /api/enroll/:courseId -> get specific enrollment info
-router.get("/:courseId", protect, getEnrolledCourse);
+router.get("/enroll/", protect, isEnrolled, getEnrolledCourses);
 
-// DELETE /api/enroll/:courseId -> unenroll from a course
-router.delete("/:courseId", protect, unEnroll);
+router.get("/enroll/:courseId", protect, isEnrolled, getEnrolledCourse);
+
+router.delete("/enroll/:courseId", protect, isEnrolled, unEnroll);
 
 export default router;

@@ -73,8 +73,8 @@
 //   }
 // };
 
-import Course from "../model/Course.model";
-import Lesson from "../model/Lesson.model";
+import Course from "../model/Course.model.js";
+import Lesson from "../model/Lesson.model.js";
 
 export const createLesson = async (req, res) => {
   const { title, description, videoUrl } = req.body;
@@ -99,6 +99,12 @@ export const createLesson = async (req, res) => {
 
 export const getLessonByCourse = async (req, res) => {
   const { courseId } = req.params;
+
+  if (courseId != Lesson.courseId.toString()) {
+    return res.status(403).json({
+      message: " invalid lesson ",
+    });
+  }
 
   const lessons = await Lesson.find({ courseId, status: "published" }).sort({
     lessonOrder: 1,
@@ -146,4 +152,32 @@ export const deleteOne = async (req, res) => {
   }
 
   res.json({ Message: "The lesson is sucessfully deleted" });
+};
+
+export const saveVideo = async (req, res) => {
+  const { lessonId, courseId } = req.params;
+  const { type, public_id, url } = req.body;
+
+  const lesson = await Lesson.findById(lessonId);
+  if (!lesson) {
+    return res.status(404).json({
+      Message: " not found",
+    });
+  }
+
+  const course = await Course.findById(lessonId);
+  if (!course) {
+    return res.status(404).json({
+      Message: " not found",
+    });
+  }
+
+  if (type === "thumbnail") {
+    course.thumbnail = { public_id, url };
+  }
+  if (type === "video") {
+    lesson.videoUrl = { public_id, url };
+  }
+
+  await lesson.save();
 };

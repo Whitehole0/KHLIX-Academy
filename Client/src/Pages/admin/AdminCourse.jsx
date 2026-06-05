@@ -1,7 +1,7 @@
 // src/pages/admin/AdminCourse.jsx
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { coursesAPI, lessonsAPI } from "../../utils/api";
+import { coursesAPI, lessonsAPI } from "../../services/api";
 
 const AdminCourse = () => {
   const { courseId } = useParams();

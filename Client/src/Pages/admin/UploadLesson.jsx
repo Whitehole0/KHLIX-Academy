@@ -1,7 +1,7 @@
 // src/pages/admin/UploadLesson.jsx
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
-import { uploadAPI, lessonsAPI } from "../../utils/api";
+import { uploadAPI, lessonsAPI } from "../../services/api";
 
 const UploadLesson = () => {
   const { courseId } = useParams();

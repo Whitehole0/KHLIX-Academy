@@ -1,7 +1,7 @@
 // src/pages/admin/CreateCourse.jsx
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { coursesAPI } from "../../utils/api";
+import { coursesAPI } from "../../services/api";
 
 const CreateCourse = () => {
   const navigate = useNavigate();

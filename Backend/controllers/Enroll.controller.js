@@ -1,5 +1,5 @@
-import Course from "../model/Course.model";
-import Enroll from "../model/Enroll.model";
+import Course from "../model/Course.model.js";
+import Enroll from "../model/Enroll.model.js";
 
 export const enrollStudent = async (req, res) => {
   const { courseId } = req.params;

@@ -52,32 +52,11 @@ export const courseStatus = async (req, res, next) => {
       });
     }
 
-    req.course = course; // attach for next middleware/controller
+    req.course = course;
     next();
   } catch (error) {
     res.status(500).json({ message: "Server error" });
   }
-};
-
-import Enroll from "../model/Enroll.model.js";
-
-export const isEnrolled = async (req, res, next) => {
-  const userId = req.user._id;
-  const { courseId } = req.params;
-
-  const enrolled = await Enroll.findOne({
-    userId,
-    courseId,
-    status: "active",
-  });
-
-  if (!enrolled) {
-    return res.status(403).json({
-      message: "You are not enrolled in this course",
-    });
-  }
-
-  next();
 };
 
 import Lesson from "../model/Lesson.model.js";
@@ -99,8 +78,6 @@ export const lessonPublishedOnly = async (req, res, next) => {
   req.lesson = lesson;
   next();
 };
-
-import Course from "../model/Course.model.js";
 
 export const isCourseOwner = async (req, res, next) => {
   const { courseId } = req.params;

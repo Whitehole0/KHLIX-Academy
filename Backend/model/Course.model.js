@@ -5,13 +5,17 @@ const courseSchema = new mongoose.Schema(
     title: { type: String, required: true, index: true },
 
     slug: { type: String, unique: true },
-    description: String,
-    category: String,
+    description: { type: String },
+    category: { type: String },
     status: {
       type: String,
       enum: ["draft", "published", "archived"],
       default: "draft",
       index: true,
+    },
+    instructor: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
     },
 
     price: { type: Number, default: 0 },
@@ -21,11 +25,14 @@ const courseSchema = new mongoose.Schema(
       default: "beginner",
     },
     instructor: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-    thumbnail: String,
+    thumbnail: {
+      url: String,
+      public_id: String,
+    },
     studentsCount: { type: Number, default: 0 },
     avgRating: { type: Number, default: 0 },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 export default mongoose.model("Course", courseSchema);

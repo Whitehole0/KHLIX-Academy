@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import { coursesAPI } from "../../utils/api";
+import { coursesAPI } from "../../services/api";
 
 const CourseDetail = () => {
   const { courseId } = useParams();

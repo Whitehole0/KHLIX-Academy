@@ -6,11 +6,17 @@ const lessonSchema = new mongoose.Schema({
   description: { type: String, required: true },
   lessonType: {
     type: String,
-    enum: { Video, Article, Quiz, Assignment },
-    default: Video,
+    // enum: { Video, Article, Quiz, Assignment },
+    // default: Video,
   },
-  videoUrl: String,
-  doucment: String,
+  video: {
+    url: String,
+    public_id: String,
+  },
+  pdf: {
+    url: String,
+    public_id: String,
+  },
   lessonOrder: { type: Number, required: true },
   lessonDuration: { type: Number },
   status: {

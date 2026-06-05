@@ -1,34 +1,19 @@
-import Course from "../model/Course.model";
 import Enroll from "../model/Enroll.model";
 
-export const enroleMiddleware = async (req, res, next) => {
+export const isEnrolled = async (req, res, next) => {
   const userId = req.user._id;
-  const courseId = req.params;
-  const course = await Course.findById(courseId);
+  const { courseId } = req.params;
 
-  if (!course) {
-    res.status(401).json({ message: "the course is not found" });
-  }
-
-  const enrollment = await Enroll.findOne({ userId, courseId });
-
-  if (enrollment) {
-    res.status(200).json({ message: "You are already enrolled" });
-  }
-  req.enrollment = enrollment;
-  next();
-};
-
-export const requireEnrollment = (req, res, next) => {
-  const userId = req.user._id;
-  const courseId = req.params;
-
-  const enrolled = Enroll.findOne({ userId, courseId });
+  const enrolled = await Enroll.findOne({
+    userId,
+    courseId,
+    status: "active",
+  });
 
   if (!enrolled) {
-    res
-      .status(403)
-      .json({ message: "You have to enroll to these course first" });
+    return res.status(403).json({
+      message: "You are not enrolled in this course",
+    });
   }
 
   next();

@@ -1,7 +1,7 @@
 import asyncHandler from "express-async-handler";
-import { verifyAccessToken } from "../utils/verifyTokens.js";
-import Session from "../models/Session.model.js";
-import User from "../models/User.model.js";
+import { verifyAccessToken } from "../utils/verifyToken.js";
+import Session from "../model/Session.model.js";
+import User from "../model/User.model.js";
 
 export const protect = asyncHandler(async (req, res, next) => {
   const token = req.cookies.accessToken;

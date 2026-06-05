@@ -5,6 +5,8 @@ import {
   refresh,
   logout,
   logoutAll,
+  forgetPassword,
+  resetPassword,
 } from "../controllers/Auth.controller.js";
 import { protect, role } from "../middleware/Auth.middleware.js";
 
@@ -21,5 +23,8 @@ router.get("/me", protect, role("student"), (req, res) =>
 router.get("/adminCheck", protect, role("admin"), (req, res) =>
   res.json({ success: true }),
 );
+
+router.post("/forgetPassword", forgetPassword);
+router.post("/resetPasword/:token", resetPassword);
 
 export default router;

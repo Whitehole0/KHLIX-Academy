@@ -1,7 +1,7 @@
 // src/pages/public/CourseListing.jsx
 import { useState, useEffect } from "react";
 import CourseCard from "../../components/CourseCard";
-import { coursesAPI } from "../../utils/api";
+import { coursesAPI } from "../../services/api";
 
 const CourseListing = () => {
   const [courses, setCourses] = useState([]);

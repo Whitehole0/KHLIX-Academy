@@ -1,7 +1,7 @@
 // src/pages/student/Course.jsx
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { lessonsAPI } from "../../utils/api";
+import { lessonsAPI } from "../../services/api";
 
 const StudentCourse = () => {
   const { courseId } = useParams();

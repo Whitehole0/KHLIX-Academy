@@ -1,11 +1,11 @@
 import asyncHandler from "express-async-handler";
-import Session from "../models/Session.model.js";
-import User from "../models/User.model.js";
+import Session from "../model/Session.model.js";
+import User from "../model/User.model.js";
 import {
   generateAccessToken,
   generateRefreshToken,
-} from "../utils/generateTokens.js";
-import { verifyRefreshToken } from "../utils/verifyTokens.js";
+} from "../utils/generateToken.js";
+import { verifyRefreshToken } from "../utils/verifyToken.js";
 
 const cookieOptions = {
   httpOnly: true,
@@ -146,3 +146,54 @@ export const logoutAll = asyncHandler(async (req, res) => {
   res.clearCookie("refreshToken");
   res.json({ success: true, message: "Logged out from all devices" });
 });
+
+export const forgetPassword = async (req, res) => {
+  const { email } = req.body;
+
+  const user = await User.findOne({ email });
+
+  if (!user) {
+    return res.status(404).json({ Message: " user not found" });
+  }
+
+  const resetToken = user.createResetPasswordToken();
+
+  await user.save({ validateBeforeSave: false });
+
+  const resetUrl = `http://localhsot:3000/resetPassword/${resetToken}`;
+
+  //Todo :email verification
+  //Practice code
+  const message = `<a href = ${resetUrl}>resetUrl</a>`;
+
+  //Send email
+
+  res.status(200).json({ success: true, Message: " reset link send to email" });
+};
+
+export const resetPassword = async (req, res) => {
+  const { token } = req.params;
+  const { password } = req.body;
+
+  const hasedToken = crypto.createHash("sha256").update(token).digest("hax");
+
+  const user = await User.findOne({
+    resetPasswordToken: hasedToken,
+    resetPasswordExpire: { $gt: Date.now() },
+  });
+
+  if (!user) {
+    return;
+  }
+
+  user.password = password;
+  user.resetPasswordToken = undefined;
+  user.resetPasswordExpire = undefined;
+
+  await user.save;
+
+  res.status(200).json({
+    success: true,
+    Message: "Password reset sucessfully",
+  });
+};
